@@ -21,7 +21,9 @@
         "plugin"
     ],
     "builtin-baseline": "9259a0719d94c402aae2ab7975bc096afdec15df",
-    "overrides": [
-      { "name": "tomlplusplus", "version": "2.3.0" }
-    ]
+   "overrides": [
+  { "name": "tomlplusplus", "version": "2.3.0" },
+  { "name": "fmt", "version": "11.0.2" },
+  { "name": "spdlog", "version": "1.14.1" }
+]
 }

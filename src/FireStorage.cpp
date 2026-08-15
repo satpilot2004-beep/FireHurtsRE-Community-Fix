@@ -55,7 +55,11 @@ namespace FiresStorage
 		register_data_entry(hex | 0x4C5CF, { 7.07f, -3.69f, 202.13f }, { 418.99f, 384.54f, 532.26f }, { 0.0000f, 0.0000f, 0.0000f });
 		register_data_entry(hex | 0xCBB23, { -5.04f, -7.50f, 26.40f }, { 114.13f, 98.69f, 86.80f }, { 0.0000f, 0.0000f, 0.0000f });
 		
-		set_magic_forms(hex, { 0xFFF43, 0x108D7A });
+		// College of Winterhold magic fountain/pillar (identified via runtime diagnostic logging;
+		// the base object actually placed in-game is 0x10D264, not the earlier guesses 0xFFF43/0x108D7A).
+		register_data_entry(hex | 0x10D264, { 0.00f, 0.00f, 100.00f }, { 200.00f, 200.00f, 400.00f }, { 0.0000f, 0.0000f, 0.0000f });
+
+		set_magic_forms(hex, { 0xFFF43, 0x108D7A, 0x10D264 });
 		set_steam_forms(hex, { 0x16D4B, 0x30B39, 0xE4E22, 0xE4E24, 0xE4E23, 0x3103F, 0x3103C });
 	}
 

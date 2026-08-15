@@ -57,32 +57,56 @@ namespace FiresStorage
 			return { p[0].asFloat(), p[1].asFloat(), p[2].asFloat() };
 		}
 
-		void add_support_json(const std::string& path) {
-			Json::Value json_root;
-			std::ifstream ifs;
-			ifs.open(path);
-			ifs >> json_root;
-			ifs.close();
-			
-			for (auto& mod_name : json_root.getMemberNames()) {
-				const Json::Value mod_data = json_root[mod_name];
-				auto hex = get_mod_index(mod_name);
-				if (hex == -1)
-					continue;
+		void add_support_json(const std::string& path)
+		{
+			// Bug fix #6: wrap individual file parsing so one bad JSON doesn't abort all others
+			try {
+				Json::Value json_root;
+				std::ifstream ifs;
+				ifs.open(path);
+				if (!ifs.is_open()) {
+					logger::warn("Could not open JSON file: {}", path);
+					return;
+				}
+				ifs >> json_root;
+				ifs.close();
 
-				for (int i = 0; i < (int)mod_data.size(); i++) {
-					const auto item = mod_data[i];
-					auto id = item["id"].asInt();
+				if (!json_root.isObject()) {
+					logger::warn("JSON file has unexpected root type: {}", path);
+					return;
+				}
 
-					register_data_entry(hex | id, parse_point(item["offset"]), parse_point(item["bounds"]), parse_point(item["angle"]));
-					
-					auto type = item["type"].asInt();
-					if (type == 1) {
-						data_magic.insert(hex | id);
-					} else if (type == 2) {
-						data_steams.insert(hex | id);
+				for (auto& mod_name : json_root.getMemberNames()) {
+					const Json::Value mod_data = json_root[mod_name];
+					auto hex = get_mod_index(mod_name);
+					if (hex == -1)
+						continue;
+
+					for (int i = 0; i < (int)mod_data.size(); i++) {
+						const auto item = mod_data[i];
+
+						// Bug fix #6: validate required fields before use
+						if (!item.isMember("id") || !item.isMember("offset") ||
+							!item.isMember("bounds") || !item.isMember("angle")) {
+							logger::warn("JSON entry {} in {} missing required fields, skipping", i, mod_name);
+							continue;
+						}
+
+						auto id = item["id"].asInt();
+						register_data_entry(hex | id, parse_point(item["offset"]), parse_point(item["bounds"]), parse_point(item["angle"]));
+
+						auto type = item["type"].asInt();
+						if (type == 1) {
+							data_magic.insert(hex | id);
+						} else if (type == 2) {
+							data_steams.insert(hex | id);
+						}
 					}
 				}
+			} catch (const std::exception& e) {
+				logger::error("Exception parsing JSON file {}: {}", path, e.what());
+			} catch (...) {
+				logger::error("Unknown exception parsing JSON file: {}", path);
 			}
 		}
 
@@ -92,9 +116,19 @@ namespace FiresStorage
 
 			namespace fs = std::filesystem;
 
-			for (const auto& entry : fs::directory_iterator(jsons_path)) {
-				if (entry.path().extension() == ".json")
-					add_support_json(entry.path().string());
+			// Bug fix #1: guard against missing directory — throws filesystem_error otherwise
+			if (!fs::exists(jsons_path)) {
+				logger::warn("FireHurtsRE plugin data directory not found: {}", jsons_path);
+				return;
+			}
+
+			try {
+				for (const auto& entry : fs::directory_iterator(jsons_path)) {
+					if (entry.path().extension() == ".json")
+						add_support_json(entry.path().string());
+				}
+			} catch (const std::filesystem::filesystem_error& e) {
+				logger::error("Filesystem error iterating plugin data directory: {}", e.what());
 			}
 		}
 
@@ -105,7 +139,7 @@ namespace FiresStorage
 	public:
 		local_bounds_t get_refr_bounds(RE::TESObjectREFR* a, float scale)
 		{
-			auto id = a->GetBaseObject() ? a->GetBaseObject()->formID : -1;
+			auto id = a->GetBaseObject() ? a->GetBaseObject()->formID : static_cast<uint32_t>(-1);
 
 			RE::NiPoint3 Mid, ToMax, Rot;
 			auto i = data.find(id);
