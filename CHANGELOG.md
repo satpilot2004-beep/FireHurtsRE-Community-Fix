@@ -2,7 +2,7 @@
 
 All notable changes to this community fix are documented here.
 
-## [Unreleased] - 2026-08-15
+## [1.0.5.0] - 2026-08-15
 
 ### Fixed
 - Fire/steam/magic damage silently not applying to actors standing in fire sources with large or offset bounding boxes (e.g. the tall College of Winterhold magic pillars). The fire ticker only tested collision against the single fire object whose bounding-box *center* was nearest to the actor, instead of checking every registered fire nearby — so a closer-but-non-colliding object could be picked over the fire the actor was actually standing in. Every nearby fire is now checked.
