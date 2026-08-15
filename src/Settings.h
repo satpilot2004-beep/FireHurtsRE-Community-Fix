@@ -42,4 +42,8 @@ public:
 	// Whether damage should respect actor magic resistance (fire/frost/shock resist).
 	// When true, damage is reduced by the actor's fire resistance percentage.
 	static inline bSetting UseFireResistance{ "Damage"s, "UseFireResistance"s, true };
+
+	// Whether NPCs (non-player actors) take fire damage. The player is always
+	// affected regardless of this setting.
+	static inline bSetting NPCFireDamage{ "Damage"s, "NPCFireDamage"s, true };
 };

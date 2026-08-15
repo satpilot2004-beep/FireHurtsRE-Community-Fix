@@ -254,6 +254,8 @@ class TickerNPCs
 public:
 	void tick(float delta)
 	{
+		if (!*Settings::NPCFireDamage) return;
+
 		updateafter -= delta;
 		if (updateafter > 0.0f) return;
 		updateafter = UPDATE_INTERVAL;
