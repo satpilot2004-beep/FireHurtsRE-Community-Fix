@@ -1,0 +1,17 @@
+[General]
+# Seconds the actor must be inside fire before damage starts. 0.0 = instant.
+Delay = 0.0
+
+[Damage]
+# Health damage applied per second for each fire type.
+# Set to 0.0 to rely entirely on the spell's own magnitude.
+FireDamagePerSecond  = 5.0   # campfires, torches, hearths
+SteamDamagePerSecond = 3.0   # geothermal vents
+MagicDamagePerSecond = 8.0   # Dwemer fire, magical flames (e.g. College of Winterhold pillars)
+
+# Scale damage by the actor's fire resistance stat (0-100%).
+UseFireResistance = true
+
+# Whether NPCs (non-player actors) take fire damage. The player is always
+# affected regardless of this setting.
+NPCFireDamage = true
